@@ -66,7 +66,23 @@ void setup() {
   String password = preferences.getString("wifi_password", defaultPassword);
   if (password == defaultPassword) preferences.putString("wifi_password", defaultPassword);
   password.toCharArray(password_char, 50);
-
+  
+  String defaultDdnsProvider = "duckdns";
+  String ddnsProvider = preferences.getString("dns_provider", defaultDdnsProvider);
+  if (ddnsProvider == defaultDdnsProvider) preferences.putString("dns_provider", defaultDdnsProvider);
+  
+  String defaultDdnsDomain = "0036516127.duckdns.org";
+  String ddnsDomain  = preferences.getString("dns_domain", defaultDdnsDomain);
+  if (ddnsDomain == defaultDdnsDomain) preferences.putString("dns_domain", defaultDdnsDomain);
+  
+  String defaultDdnsToken = "3389a145-e6a6-4429-85e9-5566443edea0";
+  String ddnsToken = preferences.getString("dns_token", defaultDdnsToken);
+  if (ddnsToken == defaultDdnsToken) preferences.putString("dns_token", defaultDdnsToken);
+  
+  String defaultServerPort = "80";
+  String serverPort = preferences.getString("port", defaultServerPort);
+  if (serverPort == defaultServerPort) preferences.putString("port", defaultServerPort);
+ 
   preferences.end();
 
   pinMode(digitalGPIOPin, INPUT);
@@ -82,12 +98,19 @@ void setup() {
 
   Serial.println("");
   Serial.println("WiFi connected.");
-  Serial.println("IP address: ");
+  Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
-  server.begin();
+  
+  Serial.println("[WiFiServer] Starting server on port: " + serverPort);
+  server.begin(serverPort.toInt());
 
-  EasyDDNS.service("duckdns");
-  EasyDDNS.client("0036516127.duckdns.org", "3389a145-e6a6-4429-85e9-5566443edea0");
+  
+  Serial.println("[EasyDDNS] Using provider: " + ddnsProvider);
+  EasyDDNS.service(ddnsProvider);
+  
+  Serial.println("[EasyDDNS] Using domain: " + ddnsDomain);
+  Serial.println("[EasyDDNS] Using token: " + ddnsToken);
+  EasyDDNS.client(ddnsDomain, ddnsToken);
   EasyDDNS.onUpdate([&](const char* oldIP, const char* newIP){
     Serial.print("EasyDDNS - IP Change Detected: ");
     Serial.println(newIP);
